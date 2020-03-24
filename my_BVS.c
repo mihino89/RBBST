@@ -56,14 +56,23 @@ NODE *createNode(int val){
 }
 
 
-NODE *find_parents_sibling(NODE *current){
+NODE *find_parents_sibling(NODE *head, NODE *current){
     NODE *parrent, *parrent_of_parrent;
     parrent = current->parrent;
+
     parrent_of_parrent = parrent->parrent;
 
     if(parrent->val > parrent_of_parrent->val){
+        if(parrent_of_parrent->left == NULL){
+            // printf("now %d %d\n", parrent->parrent->val, parrent_of_parrent->val);
+            return NULL;
+        }
+        return parrent_of_parrent->left;  
+    } 
 
-    }
+    if(parrent_of_parrent->right == NULL)
+        return NULL;
+    return parrent_of_parrent->right;  
 }
 
 
@@ -71,6 +80,7 @@ NODE *find_parents_sibling(NODE *current){
  * There will be rules check of black red alg.
 */
 NODE *rules_check(NODE *head, NODE *current){
+    NODE *parent_sibling;
     
     /**
      * 3. If parent is black
@@ -80,7 +90,22 @@ NODE *rules_check(NODE *head, NODE *current){
         return head;
     }
 
-    printf("mam rodica RED farby, hodnota rodica: %d, moja hodnota: %d\n", current->parrent->val, current->val);
+    parent_sibling = find_parents_sibling(head, current);
+    if(parent_sibling != NULL && parent_sibling->color == RED){
+        printf("mam rodica RED farby, moja hodnota: %d, hodnota rodica: %d, farba suseda rodica BLACK a jeho hodnota %d\n", current->val, current->parrent->val, parent_sibling->val);
+
+        parent_sibling->color = BLACK;
+        current->parrent->color = BLACK;
+
+        if(current->parrent->parrent != head)
+            current->parrent->parrent->color = RED;
+        
+        rules_check(head, current->parrent);
+    }
+    else{
+        printf("mam rodica RED farby, moja hodnota: %d, hodnota rodica: %d, hodnota suseda rodica: NULL alebo farba black\n", current->val, current->parrent->val);
+    }
+
     return head;
 }
 
