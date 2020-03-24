@@ -117,13 +117,14 @@ NODE *left_rotations(NODE *head, NODE *current){
         current->parrent = current_parrent->parrent;
 
         if(current_parrent->val > current_parrent->parrent->val)
-        current_parrent->parrent->right = current;
+            current->parrent->right = current;
 
         else if(current_parrent->val < current_parrent->parrent->val)
-            current_parrent->parrent->left = current;
+            current->parrent->left = current;
     }
 
     current->left = current_parrent;
+    current_parrent->parrent = current;
     // printf("current: %d, current parrent: %d, current left: %d\n", current->val, current->parrent->val, current->left->val);
 
     return head;
@@ -150,13 +151,14 @@ NODE *right_rotations(NODE *head, NODE *current){
         current->parrent = current_parrent->parrent;
 
         if(current_parrent->val > current_parrent->parrent->val)
-        current_parrent->parrent->right = current;
+            current->parrent->right = current;
 
         else if(current_parrent->val < current_parrent->parrent->val)
-            current_parrent->parrent->left = current;
+            current->parrent->left = current;
     }
 
     current->right = current_parrent;
+    current_parrent->parrent = current;
     // printf("current: %d, current parrent: %d, current left: %d\n", current->val, current->parrent->val, current->left->val);
 
     return head;
@@ -199,6 +201,10 @@ NODE *rules_check(NODE *head, NODE *current){
      * Red-red parent/child relationship
     */
     parent_sibling = find_parent_sibling(head, current);
+
+    if(current->val ==  30){
+        printf("now!%d %d\n", current->parrent->val, current->parrent->parrent->val);
+    }
 
     /**
      * 4.b If parent is red and parent sibling is red as well - change colors and recheck
@@ -285,7 +291,7 @@ int main(void) {
     head = insert(head, 7);
     head = insert(head, 15);
     head = insert(head, 16);
-    // head = insert(head, 30);
+    head = insert(head, 30);
     // head = insert(head, 25);
     // head = insert(head, 40);
     // head = insert(head, 60);
