@@ -9,6 +9,10 @@
 
 #define COUNT 10 
 
+#define LEFTLEFT 0
+#define RIGHTRIGHT 1
+#define LEFTRIGHT 2
+#define RIGHTLEFT 3
 
 typedef struct node {
     int val;
@@ -35,7 +39,7 @@ void print2DUtil(NODE *head, int space) {
         printf(" "); 
         
     if(head->color == RED){
-        printf("%s%d,%d\n", KRED, head->val, head->color);
+        printf("%s%d\n", KRED, head->val);
     } else {
         printf("%s%d\n", KBLU, head->val);
     }
@@ -56,7 +60,7 @@ NODE *createNode(int val){
 }
 
 
-NODE *find_parents_sibling(NODE *head, NODE *current){
+NODE *find_parent_sibling(NODE *head, NODE *current){
     NODE *parrent, *parrent_of_parrent;
     parrent = current->parrent;
 
@@ -76,11 +80,112 @@ NODE *find_parents_sibling(NODE *head, NODE *current){
 }
 
 
+int check_which_rotation(NODE *head, NODE *current){
+    
+    if(current->val < current->parrent->val && current->parrent->val < current->parrent->parrent->val)
+        return LEFTLEFT;
+
+    if(current->val > current->parrent->val && current->parrent->val > current->parrent->parrent->val)
+        return RIGHTRIGHT;
+    
+    if(current->val > current->parrent->val && current->parrent->val < current->parrent->parrent->val)
+        return LEFTRIGHT;
+    
+    if(current->val < current->parrent->val && current->parrent->val > current->parrent->parrent->val)
+        return RIGHTLEFT;
+        
+    return -1;
+}
+
+
+NODE *left_rotations(NODE *head, NODE *current){
+
+    if(current == NULL || current->parrent == NULL){
+        printf("PROBLEM!\n");
+        return head;
+    }
+
+    NODE *current_parrent = current->parrent;
+
+    current_parrent->right = current->left;
+
+    if(current_parrent->parrent == NULL){
+        printf("Som HEAD!\n");
+        head = current;
+    }
+    else {
+        current->parrent = current_parrent->parrent;
+
+        if(current_parrent->val > current_parrent->parrent->val)
+        current_parrent->parrent->right = current;
+
+        else if(current_parrent->val < current_parrent->parrent->val)
+            current_parrent->parrent->left = current;
+    }
+
+    current->left = current_parrent;
+    // printf("current: %d, current parrent: %d, current left: %d\n", current->val, current->parrent->val, current->left->val);
+
+    return head;
+}
+
+
+NODE *right_rotations(NODE *head, NODE *current){
+
+
+    if(current == NULL || current->parrent == NULL){
+        printf("PROBLEM!\n");
+        return head;
+    }
+
+    NODE *current_parrent = current->parrent;
+
+    current_parrent->left = current->right;
+
+    if(current_parrent->parrent == NULL){
+        printf("Som HEAD!\n");
+        head = current;
+    }
+    else {
+        current->parrent = current_parrent->parrent;
+
+        if(current_parrent->val > current_parrent->parrent->val)
+        current_parrent->parrent->right = current;
+
+        else if(current_parrent->val < current_parrent->parrent->val)
+            current_parrent->parrent->left = current;
+    }
+
+    current->right = current_parrent;
+    // printf("current: %d, current parrent: %d, current left: %d\n", current->val, current->parrent->val, current->left->val);
+
+    return head;
+
+}
+
+
+NODE *do_rotations(NODE *head, NODE *current, int which_rotation){
+    if(which_rotation == LEFTRIGHT){
+        head = left_rotations(head, current);
+        head = right_rotations(head, current);
+
+        current->color = BLACK;
+        current->right->color = RED;
+        printf("current value: %d\n", current->val);
+    }
+
+
+
+    return head;
+}
+
+
 /**
  * There will be rules check of black red alg.
 */
 NODE *rules_check(NODE *head, NODE *current){
     NODE *parent_sibling;
+    int which_rotation;
     
     /**
      * 3. If parent is black
@@ -90,7 +195,14 @@ NODE *rules_check(NODE *head, NODE *current){
         return head;
     }
 
-    parent_sibling = find_parents_sibling(head, current);
+    /**
+     * Red-red parent/child relationship
+    */
+    parent_sibling = find_parent_sibling(head, current);
+
+    /**
+     * 4.b If parent is red and parent sibling is red as well - change colors and recheck
+    */
     if(parent_sibling != NULL && parent_sibling->color == RED){
         printf("mam rodica RED farby, moja hodnota: %d, hodnota rodica: %d, farba suseda rodica BLACK a jeho hodnota %d\n", current->val, current->parrent->val, parent_sibling->val);
 
@@ -102,8 +214,16 @@ NODE *rules_check(NODE *head, NODE *current){
         
         rules_check(head, current->parrent);
     }
+
+    /**
+     * 4.a If parent is red and sibling is black -> rotation and recolor
+    */
     else{
         printf("mam rodica RED farby, moja hodnota: %d, hodnota rodica: %d, hodnota suseda rodica: NULL alebo farba black\n", current->val, current->parrent->val);
+
+        which_rotation = check_which_rotation(head, current);
+        printf("which rotation: %d\n", which_rotation);
+        head = do_rotations(head, current, which_rotation);
     }
 
     return head;
@@ -160,14 +280,18 @@ NODE *insert(NODE *head, int new_value){
 int main(void) {
     NODE *head;
 
-    head = insert(head, 50);
-    head = insert(head, 70);
-    head = insert(head, 75);
-    head = insert(head, 85);
-    head = insert(head, 80);
-    head = insert(head, 30);
-    head = insert(head, 20);
-    head = insert(head, 100);
+    head = insert(head, 10);
+    head = insert(head, 18);
+    head = insert(head, 7);
+    head = insert(head, 15);
+    head = insert(head, 16);
+    // head = insert(head, 30);
+    // head = insert(head, 25);
+    // head = insert(head, 40);
+    // head = insert(head, 60);
+    // head = insert(head, 2);
+    // head = insert(head, 1);
+    // head = insert(head, 70);
 
     print2DUtil(head, 0);
 }
