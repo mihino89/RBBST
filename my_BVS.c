@@ -110,9 +110,9 @@ NODE *left_rotations(NODE *head, NODE *current){
 
     if(current->left != NULL)
         current_parrent->right->parrent = current_parrent;
-    
 
     if(current_parrent->parrent == NULL){
+        current->parrent = NULL;
         head = current;
     }
     else {
@@ -133,7 +133,6 @@ NODE *left_rotations(NODE *head, NODE *current){
 }
 
 
-// need refactor
 NODE *right_rotations(NODE *head, NODE *current){
     NODE *pom = head;
 
@@ -177,7 +176,6 @@ NODE *do_rotations(NODE *head, NODE *current, int which_rotation){
 
     if(which_rotation == LEFTRIGHT){
         pom = left_rotations(head, current);
-        // print2DUtil(head, 0);
         pom = right_rotations(head, current);
         // printf("pom: %d pom left: %d pom right: %d\n", pom->val, pom->left->val, pom->right->val);
 
@@ -186,6 +184,7 @@ NODE *do_rotations(NODE *head, NODE *current, int which_rotation){
     }
 
     else if(which_rotation == RIGHTLEFT){
+        // printf("haha %d\n", current->val);
         pom = right_rotations(head, current);
         pom = left_rotations(head, current);
 
@@ -194,7 +193,7 @@ NODE *do_rotations(NODE *head, NODE *current, int which_rotation){
     }
 
     else if(which_rotation == RIGHTRIGHT){
-        // printf("!!!!!!!current %d current->parent: %d %d\n", current->val, current->parrent->val, current->parrent->parrent->val);
+        // printf("current %d current->parent: %d %d\n", current->val, current->parrent->val, current->parrent->parrent->val);
         current->parrent->color = BLACK;
         current->parrent->parrent->color = RED;
         pom = left_rotations(head, current->parrent);
@@ -217,6 +216,7 @@ NODE *rules_check(NODE *head, NODE *current){
     NODE *pom;
     NODE *parent_sibling;
     int which_rotation;
+    // printf("current %d\n", current->val);
     
     /**
      * 3. If parent is black
@@ -253,7 +253,7 @@ NODE *rules_check(NODE *head, NODE *current){
         // printf("mam rodica RED farby, moja hodnota: %d, hodnota rodica: %d, hodnota suseda rodica: NULL alebo farba black\n", current->val, current->parrent->val);
 
         which_rotation = check_which_rotation(head, current);
-        // printf("which rotation: %d\n", which_rotation);
+        // printf("which rotation: %d %d\n", which_rotation, current->val);
         pom = do_rotations(head, current, which_rotation);
         // print2DUtil(pom, 0);
         // printf("current value: %d\n", pom->val);
@@ -349,19 +349,19 @@ int main(void) {
     head = insert(head, 492);
     head = insert(head, 940);
     head = insert(head, 48);
-    // head = insert(head, 1048);
-    // head = insert(head, 1139);
-    // head = insert(head, 509);
-    // head = insert(head, 1062);
-    // head = insert(head, 1702);
-    // head = insert(head, 1926);
-    // head = insert(head, 540);
-    // head = insert(head, 1985); 
-    // head = insert(head, 684);
-    // head = insert(head, 863);
-    // head = insert(head, 1211);
-    // head = insert(head, 397);
-    // head = insert(head, 48);
+    head = insert(head, 1048);
+    head = insert(head, 1139);
+    head = insert(head, 509);
+    head = insert(head, 1062);
+    head = insert(head, 1702);
+    head = insert(head, 1926);
+    head = insert(head, 540);
+    head = insert(head, 1985); 
+    head = insert(head, 684);
+    head = insert(head, 863);
+    head = insert(head, 1211);
+    head = insert(head, 397);
+    head = insert(head, 48);
 
     // test_small();
     // int number = 2000;
