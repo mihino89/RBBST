@@ -21,34 +21,6 @@ typedef struct node {
 } NODE;
 
 
-void print2DUtil(NODE *head, int space) { 
-    // Base case 
-    if (head == NULL) 
-        return; 
-  
-    // Increase distance between levels 
-    space += COUNT; 
-  
-    // Process right child first 
-    print2DUtil(head->right, space); 
-  
-    // Print current node after space 
-    // count 
-    printf("\n"); 
-    for (int i = COUNT; i < space; i++) 
-        printf(" "); 
-        
-    if(head->color == RED){
-        printf("%s%d\n", KRED, head->val);
-    } else {
-        printf("%s%d\n", KBLU, head->val);
-    }
-  
-    // Process left child 
-    print2DUtil(head->left, space); 
-} 
-
-
 NODE *createNode(int val){
     NODE *node = (NODE *)malloc(sizeof(NODE));
 
@@ -67,10 +39,9 @@ NODE *find_parent_sibling(NODE *head, NODE *current){
     parrent_of_parrent = parrent->parrent;
 
     if(parrent->val > parrent_of_parrent->val){
-        if(parrent_of_parrent->left == NULL){
-            // printf("now %d %d\n", parrent->parrent->val, parrent_of_parrent->val);
+        if(parrent_of_parrent->left == NULL)
             return NULL;
-        }
+
         return parrent_of_parrent->left;  
     } 
 
@@ -127,7 +98,6 @@ NODE *left_rotations(NODE *head, NODE *current){
 
     current->left = current_parrent;
     current_parrent->parrent = current;
-    // printf("current: %d, current parrent: %d, current left: %d\n", current->val, current->parrent->val, current->left->val);
 
     return head;
 }
@@ -161,10 +131,8 @@ NODE *right_rotations(NODE *head, NODE *current){
             current->parrent->left = current;
     }
 
-    // printf("haha\n");
     current->right = current_parrent;
     current_parrent->parrent = current;
-    // printf("pom: %d pom left: %d pom right: %d\n", pom->val, pom->left->parrent->val, pom->right->parrent->val);
 
     return pom;
 
@@ -177,14 +145,12 @@ NODE *do_rotations(NODE *head, NODE *current, int which_rotation){
     if(which_rotation == LEFTRIGHT){
         pom = left_rotations(head, current);
         pom = right_rotations(head, current);
-        // printf("pom: %d pom left: %d pom right: %d\n", pom->val, pom->left->val, pom->right->val);
 
         current->color = BLACK;
         current->right->color = RED;
     }
 
     else if(which_rotation == RIGHTLEFT){
-        // printf("haha %d\n", current->val);
         pom = right_rotations(head, current);
         pom = left_rotations(head, current);
 
@@ -193,7 +159,6 @@ NODE *do_rotations(NODE *head, NODE *current, int which_rotation){
     }
 
     else if(which_rotation == RIGHTRIGHT){
-        // printf("current %d current->parent: %d %d\n", current->val, current->parrent->val, current->parrent->parrent->val);
         current->parrent->color = BLACK;
         current->parrent->parrent->color = RED;
         pom = left_rotations(head, current->parrent);
@@ -216,7 +181,6 @@ NODE *rules_check(NODE *head, NODE *current){
     NODE *pom;
     NODE *parent_sibling;
     int which_rotation;
-    // printf("current %d\n", current->val);
     
     /**
      * 3. If parent is black
@@ -234,15 +198,12 @@ NODE *rules_check(NODE *head, NODE *current){
      * 4.b If parent is red and parent sibling is red as well - change colors and recheck
     */
     if(parent_sibling != NULL && parent_sibling->color == RED){
-        // printf("mam rodica RED farby, moja hodnota: %d, hodnota rodica: %d, farba suseda rodica BLACK a jeho hodnota %d\n", current->val, current->parrent->val, parent_sibling->val);
-
         parent_sibling->color = BLACK;
         current->parrent->color = BLACK;
 
         if(current->parrent->parrent != head)
             current->parrent->parrent->color = RED;
         
-        // printf("haha\n");
         rules_check(head, current->parrent->parrent);
     }
 
@@ -250,14 +211,8 @@ NODE *rules_check(NODE *head, NODE *current){
      * 4.a If parent is red and sibling is black -> rotation and recolor
     */
     else{
-        // printf("mam rodica RED farby, moja hodnota: %d, hodnota rodica: %d, hodnota suseda rodica: NULL alebo farba black\n", current->val, current->parrent->val);
-
         which_rotation = check_which_rotation(head, current);
-        // printf("which rotation: %d %d\n", which_rotation, current->val);
         pom = do_rotations(head, current, which_rotation);
-        // print2DUtil(pom, 0);
-        // printf("current value: %d\n", pom->val);
-        // rules_check(head, current->parrent->parrent);
         return pom;
     }
 }
@@ -309,80 +264,61 @@ NODE *insert(NODE *head, int new_value){
 }
 
 
-void test_small(){
-    NODE *head = NULL;
+void print2DUtil(NODE *head, int space) { 
+    // Base case 
+    if (head == NULL) 
+        return; 
+  
+    // Increase distance between levels 
+    space += COUNT; 
+  
+    // Process right child first 
+    print2DUtil(head->right, space); 
+  
+    // Print current node after space 
+    // count 
+    printf("\n"); 
+    for (int i = COUNT; i < space; i++) 
+        printf(" "); 
+        
+    if(head->color == RED){
+        printf("%s%d\n", KRED, head->val);
+    } else {
+        printf("%s%d\n", KBLU, head->val);
+    }
+  
+    // Process left child 
+    print2DUtil(head->left, space); 
+} 
 
-    int array[300];
 
-    for (int i = 0; i < 300; i++) {     // fill array
+void test_big(){
+    NODE *head=NULL;
+
+    int number = 1000000;
+    int array[number];
+
+    for (int i = 0; i < number; i++) {     
         array[i] = i;
     }
 
-    for (int i = 0; i < 300; i++) {    // shuffle array
+    for (int i = 0; i < number; i++) {    
         int temp = array[i];
-        int randomIndex = rand() % 300;
+        int randomIndex = rand() % number;
 
         array[i]           = array[randomIndex];
         array[randomIndex] = temp;
     }
 
-
-    for (int i = 0; i < 300; i++) {    // print array
-        printf("\n done with population %d \n", array[i]);
+    for (int i = 0; i < number; i++) {    
         head = insert(head, array[i]);
     }
-
-    print2DUtil(head, 0);
 }
 
 
 int main(void) {
-    NODE *head=NULL;
+    test_big();
 
-    head = insert(head, 153);
-    head = insert(head, 886);
-    head = insert(head, 457);
-    head = insert(head, 922);
-    head = insert(head, 771);
-    head = insert(head, 335);
-    head = insert(head, 1386);
-    head = insert(head, 492);
-    head = insert(head, 940);
-    head = insert(head, 48);
-    head = insert(head, 1048);
-    head = insert(head, 1139);
-    head = insert(head, 509);
-    head = insert(head, 1062);
-    head = insert(head, 1702);
-    head = insert(head, 1926);
-    head = insert(head, 540);
-    head = insert(head, 1985); 
-    head = insert(head, 684);
-    head = insert(head, 863);
-    head = insert(head, 1211);
-    head = insert(head, 397);
-    head = insert(head, 48);
-
-    // test_small();
-    // int number = 2000;
-    // int array[number];
-
-    // for (int i = 0; i < number; i++) {     // fill array
-    //     array[i] = i;
-    // }
-
-    // for (int i = 0; i < number; i++) {    // shuffle array
-    //     int temp = array[i];
-    //     int randomIndex = rand() % number;
-
-    //     array[i]           = array[randomIndex];
-    //     array[randomIndex] = temp;
-    // }
-
-
-    // for (int i = 0; i < number; i++) {    // print array
-    //     printf("\n done with population %d \n", array[i]);
-    //     head = insert(head, array[i]);
-    // }
-    print2DUtil(head, 0);
+    /* For visualisation */
+    // print2DUtil(head, 0);
 }
