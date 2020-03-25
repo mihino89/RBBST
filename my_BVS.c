@@ -325,7 +325,7 @@ int main(void) {
     head = insert(head, 63);
     head = insert(head, 64);
     head = insert(head, 41);
-    head = insert(head, 42);
+    head = insert(head, 45); 
 
     print2DUtil(head, 0);
 }
