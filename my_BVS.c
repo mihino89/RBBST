@@ -101,7 +101,6 @@ int check_which_rotation(NODE *head, NODE *current){
 NODE *left_rotations(NODE *head, NODE *current){
 
     if(current == NULL || current->parrent == NULL){
-        printf("PROBLEM!\n");
         return head;
     }
 
@@ -137,32 +136,20 @@ NODE *left_rotations(NODE *head, NODE *current){
 // need refactor
 NODE *right_rotations(NODE *head, NODE *current){
     NODE *pom = head;
-    // printf("pom: %d\n", pom->val);
-    
+
     if(current == NULL || current->parrent == NULL){
-        return head;
+        return pom;
     }
 
     NODE *current_parrent = current->parrent;
-    // printf("current: %d, head: %d, current parrent: %d\n", current->val, current->parrent->val, current_parrent->val);
 
-
-    if(current_parrent->val > current->val){
-        current_parrent->left = current->right;
-        current->right = current_parrent;
-    }
-    else{
-        current_parrent->right = current->left;
-        current_parrent->right->parrent = current_parrent;
-        current->left = current_parrent;
-        // printf("?current: %d, head: %d, current left: %d, current_parrent right: %d\n", current->val, head->val, current->left->val, current_parrent->right->val);
+    current_parrent->left = current->right;
+    if(current->right != NULL){
+        current->right->parrent = current_parrent;
     }
 
     if(current_parrent->parrent == NULL){
         pom = current;
-
-        current_parrent->parrent = current;
-        return pom;
     }
     else {
         current->parrent = current_parrent->parrent;
@@ -174,10 +161,11 @@ NODE *right_rotations(NODE *head, NODE *current){
             current->parrent->left = current;
     }
 
+    current->right = current_parrent;
     current_parrent->parrent = current;
-    printf(".current: %d, head: %d, current right:\n", current->val, head->val);
+    // printf("current: %d, current parrent: %d, current left: %d\n", current->val, current->parrent->val, current->left->val);
 
-    return head;
+    return pom;
 
 }
 
@@ -206,13 +194,15 @@ NODE *do_rotations(NODE *head, NODE *current, int which_rotation){
         current->parrent->color = BLACK;
         current->parrent->parrent->color = RED;
         pom = left_rotations(head, current->parrent);
-        // printf("HEAD VALUE: %d %d %d %d\n", pom->left->left->val, pom->left->val, pom->right->val, pom->left->right->val);
-        // print2DUtil(pom, 0);
-        return pom;
     }
 
+    else if(which_rotation == LEFTLEFT){
+        current->parrent->color = BLACK;
+        current->parrent->parrent->color = RED;
+        pom = right_rotations(head, current->parrent);
+    }
 
-    return head;
+    return pom;
 }
 
 
@@ -236,15 +226,11 @@ NODE *rules_check(NODE *head, NODE *current){
     */
     parent_sibling = find_parent_sibling(head, current);
 
-    if(current->val ==  30){
-        printf("now!%d %d\n", current->parrent->val, current->parrent->parrent->val);
-    }
-
     /**
      * 4.b If parent is red and parent sibling is red as well - change colors and recheck
     */
     if(parent_sibling != NULL && parent_sibling->color == RED){
-        printf("mam rodica RED farby, moja hodnota: %d, hodnota rodica: %d, farba suseda rodica BLACK a jeho hodnota %d\n", current->val, current->parrent->val, parent_sibling->val);
+        // printf("mam rodica RED farby, moja hodnota: %d, hodnota rodica: %d, farba suseda rodica BLACK a jeho hodnota %d\n", current->val, current->parrent->val, parent_sibling->val);
 
         parent_sibling->color = BLACK;
         current->parrent->color = BLACK;
@@ -260,13 +246,14 @@ NODE *rules_check(NODE *head, NODE *current){
      * 4.a If parent is red and sibling is black -> rotation and recolor
     */
     else{
-        printf("mam rodica RED farby, moja hodnota: %d, hodnota rodica: %d, hodnota suseda rodica: NULL alebo farba black\n", current->val, current->parrent->val);
+        // printf("mam rodica RED farby, moja hodnota: %d, hodnota rodica: %d, hodnota suseda rodica: NULL alebo farba black\n", current->val, current->parrent->val);
 
         which_rotation = check_which_rotation(head, current);
-        printf("which rotation: %d\n", which_rotation);
+        // printf("which rotation: %d\n", which_rotation);
         pom = do_rotations(head, current, which_rotation);
         // print2DUtil(pom, 0);
         // printf("current value: %d\n", pom->val);
+        // rules_check(head, current->parrent->parrent);
         return pom;
     }
 }
@@ -314,8 +301,6 @@ NODE *insert(NODE *head, int new_value){
 
     /* Kontrola pravidiel cierno cervenho stromu */
     pom = rules_check(head, current);
-    // print2DUtil(pom, 0);
-    // printf("!HEAD VALUE: %d\n", pom->val);
 
     return pom;
 }
@@ -332,10 +317,15 @@ int main(void) {
     head = insert(head, 30);
     head = insert(head, 25);
     head = insert(head, 40);
-    // head = insert(head, 60);
-    // head = insert(head, 2);
-    // head = insert(head, 1);
-    // head = insert(head, 70);
+    head = insert(head, 60);
+    head = insert(head, 2);
+    head = insert(head, 1);
+    head = insert(head, 70);
+    head = insert(head, 65);
+    head = insert(head, 63);
+    head = insert(head, 64);
+    head = insert(head, 41);
+    head = insert(head, 42);
 
     print2DUtil(head, 0);
 }
