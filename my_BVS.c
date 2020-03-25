@@ -149,6 +149,7 @@ NODE *right_rotations(NODE *head, NODE *current){
     }
 
     if(current_parrent->parrent == NULL){
+        current->parrent = NULL;
         pom = current;
     }
     else {
@@ -161,9 +162,10 @@ NODE *right_rotations(NODE *head, NODE *current){
             current->parrent->left = current;
     }
 
+    // printf("haha\n");
     current->right = current_parrent;
     current_parrent->parrent = current;
-    // printf("current: %d, current parrent: %d, current left: %d\n", current->val, current->parrent->val, current->left->val);
+    // printf("pom: %d pom left: %d pom right: %d\n", pom->val, pom->left->parrent->val, pom->right->parrent->val);
 
     return pom;
 
@@ -174,16 +176,18 @@ NODE *do_rotations(NODE *head, NODE *current, int which_rotation){
     NODE *pom;
 
     if(which_rotation == LEFTRIGHT){
-        head = left_rotations(head, current);
-        head = right_rotations(head, current);
+        pom = left_rotations(head, current);
+        // print2DUtil(head, 0);
+        pom = right_rotations(head, current);
+        // printf("pom: %d pom left: %d pom right: %d\n", pom->val, pom->left->val, pom->right->val);
 
         current->color = BLACK;
         current->right->color = RED;
     }
 
     else if(which_rotation == RIGHTLEFT){
-        head = right_rotations(head, current);
-        head = left_rotations(head, current);
+        pom = right_rotations(head, current);
+        pom = left_rotations(head, current);
 
         current->color = BLACK;
         current->left->color = RED;
@@ -270,7 +274,6 @@ NODE *insert(NODE *head, int new_value){
     if(head == NULL){
         head = createNode(new_value);
         head->color = BLACK;
-
         return head;
     }
 
@@ -306,26 +309,80 @@ NODE *insert(NODE *head, int new_value){
 }
 
 
+void test_small(){
+    NODE *head = NULL;
+
+    int array[300];
+
+    for (int i = 0; i < 300; i++) {     // fill array
+        array[i] = i;
+    }
+
+    for (int i = 0; i < 300; i++) {    // shuffle array
+        int temp = array[i];
+        int randomIndex = rand() % 300;
+
+        array[i]           = array[randomIndex];
+        array[randomIndex] = temp;
+    }
+
+
+    for (int i = 0; i < 300; i++) {    // print array
+        printf("\n done with population %d \n", array[i]);
+        head = insert(head, array[i]);
+    }
+
+    print2DUtil(head, 0);
+}
+
+
 int main(void) {
-    NODE *head;
+    NODE *head=NULL;
 
-    head = insert(head, 10);
-    head = insert(head, 18);
-    head = insert(head, 7);
-    head = insert(head, 15);
-    head = insert(head, 16);
-    head = insert(head, 30);
-    head = insert(head, 25);
-    head = insert(head, 40);
-    head = insert(head, 60);
-    head = insert(head, 2);
-    head = insert(head, 1);
-    head = insert(head, 70);
-    head = insert(head, 65);
-    head = insert(head, 63);
-    head = insert(head, 64);
-    head = insert(head, 41);
-    head = insert(head, 45); 
+    head = insert(head, 153);
+    head = insert(head, 886);
+    head = insert(head, 457);
+    head = insert(head, 922);
+    head = insert(head, 771);
+    head = insert(head, 335);
+    head = insert(head, 1386);
+    head = insert(head, 492);
+    head = insert(head, 940);
+    head = insert(head, 48);
+    // head = insert(head, 1048);
+    // head = insert(head, 1139);
+    // head = insert(head, 509);
+    // head = insert(head, 1062);
+    // head = insert(head, 1702);
+    // head = insert(head, 1926);
+    // head = insert(head, 540);
+    // head = insert(head, 1985); 
+    // head = insert(head, 684);
+    // head = insert(head, 863);
+    // head = insert(head, 1211);
+    // head = insert(head, 397);
+    // head = insert(head, 48);
 
+    // test_small();
+    // int number = 2000;
+    // int array[number];
+
+    // for (int i = 0; i < number; i++) {     // fill array
+    //     array[i] = i;
+    // }
+
+    // for (int i = 0; i < number; i++) {    // shuffle array
+    //     int temp = array[i];
+    //     int randomIndex = rand() % number;
+
+    //     array[i]           = array[randomIndex];
+    //     array[randomIndex] = temp;
+    // }
+
+
+    // for (int i = 0; i < number; i++) {    // print array
+    //     printf("\n done with population %d \n", array[i]);
+    //     head = insert(head, array[i]);
+    // }
     print2DUtil(head, 0);
 }
