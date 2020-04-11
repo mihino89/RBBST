@@ -218,7 +218,7 @@ NODE *rules_check(NODE *head, NODE *current){
 }
 
 
-NODE *insert(NODE *head, int new_value){
+NODE *insert_red_black_tree(NODE *head, int new_value){
     NODE *current, *parrent, *pom;
     current = head;
     parrent = NULL;
@@ -261,64 +261,4 @@ NODE *insert(NODE *head, int new_value){
     pom = rules_check(head, current);
 
     return pom;
-}
-
-
-void print2DUtil(NODE *head, int space) { 
-    // Base case 
-    if (head == NULL) 
-        return; 
-  
-    // Increase distance between levels 
-    space += COUNT; 
-  
-    // Process right child first 
-    print2DUtil(head->right, space); 
-  
-    // Print current node after space 
-    // count 
-    printf("\n"); 
-    for (int i = COUNT; i < space; i++) 
-        printf(" "); 
-        
-    if(head->color == RED){
-        printf("%s%d\n", KRED, head->val);
-    } else {
-        printf("%s%d\n", KBLU, head->val);
-    }
-  
-    // Process left child 
-    print2DUtil(head->left, space); 
-} 
-
-
-void test_big(){
-    NODE *head=NULL;
-
-    int number = 1000000;
-    int array[number];
-
-    for (int i = 0; i < number; i++) {     
-        array[i] = i;
-    }
-
-    for (int i = 0; i < number; i++) {    
-        int temp = array[i];
-        int randomIndex = rand() % number;
-
-        array[i]           = array[randomIndex];
-        array[randomIndex] = temp;
-    }
-
-    for (int i = 0; i < number; i++) {    
-        head = insert(head, array[i]);
-    }
-}
-
-
-int main(void) {
-    test_big();
-
-    /* For visualisation */
-    // print2DUtil(head, 0);
 }
