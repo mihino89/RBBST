@@ -3,25 +3,15 @@
 #include <math.h>
 
 #define size 11
-#define ARRAY_BEGIN_SIZE 100
 
-struct node2{ 
+typedef struct node2{ 
     int val; 
     struct node2 *next;
-};
-struct node2 *nodik[ARRAY_BEGIN_SIZE];
-int ARRAY_SIZE = ARRAY_BEGIN_SIZE;
+} NODE2;
 
-
-struct node2 *createNode(int val){
-    struct node2  *node = (struct node2  *)malloc(sizeof(struct node2 ));
-
-    node->next = NULL;
-    node->val = val;
-
-    return node;
-}
-
+//pole 
+NODE2 *struct_arr;
+int ARRAY_SIZE;
 
 /* Pri int datasete je to jedno, staci ulozit na value index */
 int generate_hash(int value, int size_of_arr){
@@ -63,45 +53,95 @@ int eratosten(int size_of_array){
 }
 
 
-void re_indexing_sizing(int new_arr_size, int akt_arr_size){
-    struct node2 *new_node_arr[new_arr_size];
+void insert_chaining_hash(NODE2 *arr[], int value){
+    static int num_of_nodes_in_arr = 0;
+    int hash, nearest_prime_num;
+    NODE2 *previous_node;
+
+    hash = generate_hash(value, ARRAY_SIZE);
+
+    if(arr[hash]== NULL){
+        arr[hash]->val = value;
+        arr[hash]->next = NULL;
+    } else {
+        previous_node = arr[hash];
+        while(previous_node->next != NULL){
+            previous_node = previous_node->next;
+        }
+        previous_node->next->val = value;
+        previous_node->next->next = NULL;
+    }
+
+    num_of_nodes_in_arr++;
+}
+
+
+NODE2 *arr_init(){
+    return (NODE2 *)malloc(ARRAY_SIZE * sizeof (NODE2));
+}
+
+
+void re_indexing_sizing(NODE2 *arr[]){
+    int old_arr_size = ARRAY_SIZE/3;
+    NODE2 *new_node_arr = arr_init();
+    NODE2 *current, *current2;
     int new_hash;
 
-    for(int i = 0; i <= akt_arr_size; i++){
-        if(nodik[i] != NULL){
-            /* pre indexing */
-            new_hash = generate_hash(nodik[i]->val, new_arr_size);
-            new_node_arr[new_hash] = nodik[i];
+    for(int i = 0; i <= old_arr_size; i++){
+        if(arr[i] != NULL && arr[i]->next != NULL){
+            current = arr[i];
+
+            while(current->next != NULL){
+                new_hash = generate_hash(current->val, ARRAY_SIZE);
+                current2 = new_node_arr[new_hash];
+
+                if(current2 == NULL){
+                    current2 = current;
+                }
+                else{
+                    while(current2->next != NULL){
+                        current2 = current2->next;
+                    }
+                    current2->next = current;
+                }
+
+                current = current->next;
+            }            
+        }
+        else if(arr[i] != NULL && arr[i]->next == NULL){
+
+            /* pre indexing - skontrul aj kyblik */
+            new_hash = generate_hash(arr[i]->val, ARRAY_SIZE);
+            current = new_node_arr[new_hash];
+
+            if(current == NULL){
+                current = arr[i];
+            }
+            else{
+                while(current->next != NULL){
+                    current = current->next;
+                }
+                current->next = arr[i];
+            }
         }
     }
+
+    free(struct_arr);
+    struct_arr = new_node_arr;
 
     // TODO - aktualizuj nodik ako new node arr
 }
 
 
-void insert_chaining_hash(int value){
-    static int num_of_nodes_in_arr = 0;
-    int hash, nearest_prime_num;
-    struct node2 *new_node, *previous_node;
+int main(int n, int arr[]){
+    ARRAY_SIZE = eratosten(n);
+    struct_arr = arr_init();
 
-    num_of_nodes_in_arr++;
-
-    /* resing and implicated reindexing */
-    if(num_of_nodes_in_arr > (ARRAY_SIZE / 2)){
-        nearest_prime_num = eratosten(ARRAY_SIZE);
-        re_indexing_sizing(nearest_prime_num, num_of_nodes_in_arr);
-    }
-
-    hash = generate_hash(value, ARRAY_SIZE);
-    new_node = createNode(value);
-
-    if(nodik[hash] != NULL){
-        nodik[hash] = createNode(value);
-    } else {
-        previous_node = nodik[hash];
-        while(previous_node->next != NULL){
-            previous_node = previous_node->next;
+    for(int i = 0; i < n; i ++){
+        insert_chaining_hash(struct_arr, arr[i]);
+        if(i > ARRAY_SIZE/2){
+            ARRAY_SIZE = eratosten(3*n);
+            re_indexing_sizing(struct_arr);
         }
-        previous_node->next = new_node;
     }
 }
