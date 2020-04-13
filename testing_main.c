@@ -3,7 +3,7 @@
 #include "AVL_tree.c"
 #include "Red_Black_tree.c"
 #include "chaining_hashing.c"
- 
+ // https://www.geeksforgeeks.org/hashing-set-3-open-addressing/
 
 void test_big_avl(){
     Node *head=NULL;
@@ -65,12 +65,13 @@ void test_big_red_black(){
 
 
 void test_hashing(){
-    int number = 1000;
+    int number = 11;
     int array[number];
 
-    for (int i = 1; i < number; i++) {     
+    for (int i = 1; i < number-1; i++) {     
         array[i] = i;
     }
+    array[10] = 2;
 
     main_chaining_hashing(number, array);
 }
