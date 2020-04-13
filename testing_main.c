@@ -2,6 +2,7 @@
 #include <time.h>   	// for time()
 #include "AVL_tree.c"
 #include "Red_Black_tree.c"
+#include "chaining_hashing.c"
  
 
 void test_big_avl(){
@@ -62,12 +63,27 @@ void test_big_red_black(){
     printf("Time elpased of RED BLACK TREE is %f seconds\n", time_spent);
 }
 
+
+void test_hashing(){
+    int number = 1000;
+    int array[number];
+
+    for (int i = 1; i < number; i++) {     
+        array[i] = i;
+    }
+
+    main_chaining_hashing(number, array);
+}
+
+
 int main() 
 { 
   struct Node *root = NULL; 
 
-  test_big_avl();
-  test_big_red_black();
+//   test_big_avl();
+//   test_big_red_black();
+
+  test_hashing();
   
   return 0; 
 } 
