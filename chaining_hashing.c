@@ -11,6 +11,7 @@ typedef struct hash_item{
 
 typedef struct hash_table{
     HASH_ITEM *chain_root;
+    HASH_ITEM *chain_last;
 } HASH_TABLE;
 
 
@@ -23,7 +24,6 @@ int eratosten(int size_of_array){
     int i, j;
     int arr[size_of_array+1];
 
-    // zaplni pole 1
     for (i = 0; i <= size_of_array; i++)
         arr[i] = 1;
 
@@ -43,8 +43,6 @@ int eratosten(int size_of_array){
             max = i;
     }
 
-    // printf("max: %d\n", max);
-
     return max;
 }
 
@@ -55,7 +53,7 @@ int generate_hash(int value, int size_of_arr){
 }
 
 float load_factor(float max, float akt){
-    printf("load factor %lf\n", akt/max);
+    // printf("load factor %lf\n", akt/max);
     return ((float) akt/max);
 }
 
@@ -78,13 +76,12 @@ void insert_chaining_hash(int value){
     new_hash_item = createNewNode(value);
     hash = generate_hash(value, ARRAY_SIZE);
 
-    printf("tu to este funguje1: %d %d\n", hash, new_hash_item->val);
+    // printf("tu to este funguje1: %d %d\n", hash, new_hash_item->val);
 
     if(hash_table[hash].chain_root == NULL){
-        printf("root je NULL a novy root je s hodnotou: %d\n", value);
-        hash_table[hash].chain_root = new_hash_item;
+        hash_table[hash].chain_root = hash_table[hash].chain_last = new_hash_item;
+        printf("INSERT -> root je NULL na indexe %d prvy node s hodnotou: %d posledny: %d\n", hash, hash_table[hash].chain_root->val, hash_table[hash].chain_last->val);
     } else {
-        printf("root nieje NULL a val je s hodnotou: %d\n", value);
         current = hash_table[hash].chain_root;
         while(current->next != NULL){
             if(current->val == value) 
@@ -92,6 +89,8 @@ void insert_chaining_hash(int value){
             current = current->next;
         }
         current->next = new_hash_item;
+        hash_table[hash].chain_last = new_hash_item;
+        printf("INSERT -> root nie je NULL na indexe %d ulozeny node s hodnotou: %d, predchadzajuci %d a root v chaine: %d\n", hash, current->next->val, current->val, hash_table[hash].chain_root->val);
     }
 }
 
@@ -100,7 +99,7 @@ HASH_TABLE *arr_init(int arr_init_size){
     HASH_TABLE *arr_init = (HASH_TABLE *)malloc(arr_init_size * sizeof(HASH_TABLE));
 
     for(int i = 0; i < ARRAY_SIZE; i++){
-        arr_init[i].chain_root = NULL;
+        arr_init[i].chain_root = arr_init[i].chain_last = NULL;
     }
 
     return arr_init;
@@ -112,25 +111,31 @@ HASH_TABLE *re_indexing_sizing(int old_arr_size){
     HASH_ITEM *current, *current2;
     int new_hash;
 
-    printf("old size: %d\n", old_arr_size);
     new_hash_table = arr_init(ARRAY_SIZE);
 
     for(int i = 0; i < old_arr_size; i++){
         if(hash_table[i].chain_root != NULL && hash_table[i].chain_root->next != NULL){
+            printf("chaining root: %d\n", hash_table[i].chain_root->val);
             current = hash_table[i].chain_root;
 
-            while(current->next != NULL){
+            while(current != NULL){
                 new_hash = generate_hash(current->val, ARRAY_SIZE);
-                current2 = new_hash_table[new_hash].chain_root;
+                // current2 = new_hash_table[new_hash].chain_root;
 
-                if(current2 == NULL){
-                    current2 = current;
+                if(new_hash_table[new_hash].chain_root == NULL){
+                    new_hash_table[new_hash].chain_root = new_hash_table[new_hash].chain_last = current;
+                    printf("case 1\n");
+                    printf("RE-INDEXING -> povodny NON-ROOT, new index root je NULL na indexe %d ulozeny node s hodnotou: %d\n", new_hash, new_hash_table[new_hash].chain_root->val);
                 }
                 else{
-                    while(current2->next != NULL){
-                        current2 = current2->next;
-                    }
-                    current2->next = current;
+                    // while(current2->next != NULL){
+                    //     current2 = current2->next;
+                    // }
+                    // current2->next = current;
+                    new_hash_table[new_hash].chain_last->next = current;
+                    new_hash_table[new_hash].chain_last = current;
+                    printf("case 2\n");
+                    printf("RE-INDEXING -> povodny NON-ROOT, new index root nie je NULL na indexe %d root node: %d a posledny chain (ten co som vlozil): %d\n", new_hash, new_hash_table[new_hash].chain_root->val, new_hash_table[new_hash].chain_last->val);
                 }
 
                 current = current->next;
@@ -138,19 +143,20 @@ HASH_TABLE *re_indexing_sizing(int old_arr_size){
         }
         /* V LL je iba jeden node */
         else if(hash_table[i].chain_root  != NULL && hash_table[i].chain_root->next == NULL){
-
+            printf("chaining root: %d\n", hash_table[i].chain_root->val);
             /* pre indexing - skontrul aj kyblik */
             new_hash = generate_hash(hash_table[i].chain_root->val, ARRAY_SIZE);
-            current = new_hash_table[new_hash].chain_root;
 
-            if(current == NULL){
-                current = hash_table[i].chain_root;
+            if(new_hash_table[new_hash].chain_root == NULL){
+                new_hash_table[new_hash].chain_root = new_hash_table[new_hash].chain_last = hash_table[i].chain_root;
+                printf("case 3\n");
+                printf("RE-INDEXING -> povodny ROOT, new index root je NULL na indexe %d ulozeny node s hodnotou: %d\n", new_hash, new_hash_table[new_hash].chain_root->val);
             }
             else{
-                while(current->next != NULL){
-                    current = current->next;
-                }
-                current->next = hash_table[i].chain_root;
+                new_hash_table[new_hash].chain_last->next = hash_table[i].chain_root;
+                new_hash_table[new_hash].chain_last = hash_table[i].chain_root;
+                printf("case 4\n");
+                printf("RE-INDEXING -> povodny ROOT, new index root nie je NULL na indexe %d root node: %d a posledny chain (ten co som vlozil): %d\n", new_hash, new_hash_table[new_hash].chain_root, new_hash_table[new_hash].chain_last->val);
             }
         }
     }
@@ -162,25 +168,40 @@ HASH_TABLE *re_indexing_sizing(int old_arr_size){
 
 int main_chaining_hashing(int n, int arr[]){
     int old_size;
-    HASH_TABLE* new_bigger_arr;
+    HASH_TABLE *new_bigger_arr;
+    HASH_ITEM *current;
 
     ARRAY_SIZE = eratosten(n);
     hash_table = arr_init(ARRAY_SIZE);
 
     printf("ARR_SIZE: %d\n", ARRAY_SIZE);
 
-    // TODO - osetrit nech array_size je vacsi ako n, nie mensi
-    for(int i = 1; i < n; i ++){
+    for(int i = 0; i < n; i ++){
         // printf("main iteration: %d\n", i);
         insert_chaining_hash(arr[i]);
         
         // // resizing
         if(load_factor(ARRAY_SIZE, i) > 0.66){
-            printf("now!\n");
+            printf("resizing and reindexing!\n");
             old_size = ARRAY_SIZE;
             ARRAY_SIZE = eratosten(3*ARRAY_SIZE);
-            printf("new size: %d\n", ARRAY_SIZE);
             hash_table = re_indexing_sizing(old_size);
+        }
+    }
+
+    printf("final array size: %d\n", ARRAY_SIZE);
+    for(int i = 0; i < ARRAY_SIZE; i ++){
+        if(hash_table[i].chain_root == NULL){
+            printf("chain: %d is NULL\n", i);
+        }
+        else {
+            current = hash_table[i].chain_root;
+            printf("chain: %d is ", i);
+            while(current->next != NULL){
+                printf("%d ", current->val);
+                current = current->next;
+            }
+            printf("%d \n", current->val);
         }
     }
 }
