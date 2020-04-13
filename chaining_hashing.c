@@ -3,7 +3,6 @@
 #include <math.h>
 #include <string.h>
 
-#define size 11
 
 typedef struct hash_item{ 
     int val; 
@@ -13,6 +12,7 @@ typedef struct hash_item{
 typedef struct hash_table{
     HASH_ITEM *chain_root;
 } HASH_TABLE;
+
 
 // globalne pole 
 HASH_TABLE* hash_table;
@@ -54,7 +54,8 @@ int generate_hash(int value, int size_of_arr){
     return (value % size_of_arr);
 }
 
-float load_factor(int max, int akt){
+float load_factor(float max, float akt){
+    printf("load factor %lf\n", akt/max);
     return ((float) akt/max);
 }
 
@@ -80,8 +81,10 @@ void insert_chaining_hash(int value){
     printf("tu to este funguje1: %d %d\n", hash, new_hash_item->val);
 
     if(hash_table[hash].chain_root == NULL){
+        printf("root je NULL a novy root je s hodnotou: %d\n", value);
         hash_table[hash].chain_root = new_hash_item;
     } else {
+        printf("root nieje NULL a val je s hodnotou: %d\n", value);
         current = hash_table[hash].chain_root;
         while(current->next != NULL){
             if(current->val == value) 
@@ -93,14 +96,68 @@ void insert_chaining_hash(int value){
 }
 
 
-void arr_init(){
-    hash_table = (HASH_TABLE *)malloc(ARRAY_SIZE * sizeof(HASH_TABLE));
+HASH_TABLE *arr_init(int arr_init_size){
+    HASH_TABLE *arr_init = (HASH_TABLE *)malloc(arr_init_size * sizeof(HASH_TABLE));
 
     for(int i = 0; i < ARRAY_SIZE; i++){
-        hash_table[i].chain_root = NULL;
+        arr_init[i].chain_root = NULL;
     }
+
+    return arr_init;
 }
 
+
+HASH_TABLE *re_indexing_sizing(int old_arr_size){
+    HASH_TABLE * new_hash_table;
+    HASH_ITEM *current, *current2;
+    int new_hash;
+
+    printf("old size: %d\n", old_arr_size);
+    new_hash_table = arr_init(ARRAY_SIZE);
+
+    for(int i = 0; i < old_arr_size; i++){
+        if(hash_table[i].chain_root != NULL && hash_table[i].chain_root->next != NULL){
+            current = hash_table[i].chain_root;
+
+            while(current->next != NULL){
+                new_hash = generate_hash(current->val, ARRAY_SIZE);
+                current2 = new_hash_table[new_hash].chain_root;
+
+                if(current2 == NULL){
+                    current2 = current;
+                }
+                else{
+                    while(current2->next != NULL){
+                        current2 = current2->next;
+                    }
+                    current2->next = current;
+                }
+
+                current = current->next;
+            }            
+        }
+        /* V LL je iba jeden node */
+        else if(hash_table[i].chain_root  != NULL && hash_table[i].chain_root->next == NULL){
+
+            /* pre indexing - skontrul aj kyblik */
+            new_hash = generate_hash(hash_table[i].chain_root->val, ARRAY_SIZE);
+            current = new_hash_table[new_hash].chain_root;
+
+            if(current == NULL){
+                current = hash_table[i].chain_root;
+            }
+            else{
+                while(current->next != NULL){
+                    current = current->next;
+                }
+                current->next = hash_table[i].chain_root;
+            }
+        }
+    }
+
+    free(hash_table);
+    return new_hash_table;
+}
 
 
 int main_chaining_hashing(int n, int arr[]){
@@ -108,73 +165,22 @@ int main_chaining_hashing(int n, int arr[]){
     HASH_TABLE* new_bigger_arr;
 
     ARRAY_SIZE = eratosten(n);
-    arr_init();
+    hash_table = arr_init(ARRAY_SIZE);
+
+    printf("ARR_SIZE: %d\n", ARRAY_SIZE);
 
     // TODO - osetrit nech array_size je vacsi ako n, nie mensi
-    for(int i = 1; i < ARRAY_SIZE; i ++){
+    for(int i = 1; i < n; i ++){
         // printf("main iteration: %d\n", i);
         insert_chaining_hash(arr[i]);
         
-        
         // // resizing
-        // if(load_factor(n, i)){
-        //     old_size = ARRAY_SIZE;
-        //     ARRAY_SIZE = eratosten(3*n);
-        //     printf("new size: %d\n", ARRAY_SIZE);
-        //     new_bigger_arr = arr_init();
-        //     struct_arr = re_indexing_sizing(struct_arr, new_bigger_arr, old_size);
-        // }
+        if(load_factor(ARRAY_SIZE, i) > 0.66){
+            printf("now!\n");
+            old_size = ARRAY_SIZE;
+            ARRAY_SIZE = eratosten(3*ARRAY_SIZE);
+            printf("new size: %d\n", ARRAY_SIZE);
+            hash_table = re_indexing_sizing(old_size);
+        }
     }
 }
-
-
-// NODE2 *re_indexing_sizing(NODE2 *arr, NODE2 *new_node_arr, int old_arr_size){
-//     NODE2 *current, *current2;
-//     int new_hash;
-//     printf("old size: %d\n", old_arr_size);
-
-//     for(int i = 0; i < old_arr_size; i++){
-//         // printf("iteration: %d\n", i );
-//         if((arr + i) != NULL && arr[i].next != NULL){
-//             current = (arr+i);
-
-//             while(current->next != NULL){
-//                 new_hash = generate_hash(current->val, ARRAY_SIZE);
-//                 current2 = (new_node_arr+new_hash);
-
-//                 if(current2 == NULL){
-//                     current2 = current;
-//                 }
-//                 else{
-//                     while(current2->next != NULL){
-//                         current2 = current2->next;
-//                     }
-//                     current2->next = current;
-//                 }
-
-//                 current = current->next;
-//             }            
-//         }
-//         else if((arr+i) != NULL && (arr+i)->next == NULL){
-
-//             /* pre indexing - skontrul aj kyblik */
-//             new_hash = generate_hash((arr+i)->val, ARRAY_SIZE);
-//             current = (new_node_arr+new_hash);
-
-//             if(current == NULL){
-//                 current = (arr+i);
-//             }
-//             else{
-//                 while(current->next != NULL){
-//                     current = current->next;
-//                 }
-//                 current->next = (arr+i);
-//             }
-//         }
-//     }
-
-//     free(struct_arr);
-//     struct_arr = new_node_arr;
-
-//     // TODO - aktualizuj nodik ako new node arr
-// }

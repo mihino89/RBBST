@@ -65,6 +65,7 @@ void test_big_red_black(){
 
 
 void test_hashing(){
+    int arr[] = {54, 21, 96, 33, 76, 3212, 954, 41, 43245, 996};
     int number = 11;
     int array[number];
 
@@ -73,7 +74,7 @@ void test_hashing(){
     }
     array[10] = 2;
 
-    main_chaining_hashing(number, array);
+    main_chaining_hashing(10, arr);
 }
 
 
