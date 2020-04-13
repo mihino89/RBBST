@@ -6,8 +6,9 @@
 #define size 11
 
 typedef struct node2{ 
-    int *val; 
+    int val; 
     struct node2 *next;
+    struct node2 *is_empty;
 } NODE2;
 
 //pole 
@@ -19,14 +20,6 @@ int generate_hash(int value, int size_of_arr){
     return (value % size_of_arr);
 }
 
-// NODE2 *createNode(int val){
-//     NODE2 *node = (NODE2 *)malloc(sizeof(NODE2));
-
-//     node->next = NULL;
-//     node->val = val;
-
-//     return node;
-// }
 
 int eratosten(int size_of_array){
     int i, j;
@@ -67,9 +60,8 @@ void insert_chaining_hash(NODE2 *arr, int value){
     printf("tu to este funguje1: %d %d\n", hash, ARRAY_SIZE);
 
 // ((arr+ hash)->val)
-    if(arr[hash]->val == NULL){
-        
-        *((arr+hash)->val) = value;
+    if((arr + hash)->is_empty == NULL){
+        (arr+hash)->val = value;
          printf("je to nula a mozem to sem ulozit\n");
         (arr+hash)->next = NULL;
     } else {
@@ -78,7 +70,7 @@ void insert_chaining_hash(NODE2 *arr, int value){
         while(previous_node->next != NULL){
             previous_node = previous_node->next;
         }
-        *(previous_node->next->val) = value;
+        previous_node->next->val = value;
         previous_node->next->next = NULL;
     }
 
@@ -86,17 +78,18 @@ void insert_chaining_hash(NODE2 *arr, int value){
 }
 
 
-void re_indexing_sizing(NODE2 *arr, NODE2 *new_node_arr){
-    int old_arr_size = ARRAY_SIZE/3;
+NODE2 *re_indexing_sizing(NODE2 *arr, NODE2 *new_node_arr, int old_arr_size){
     NODE2 *current, *current2;
     int new_hash;
+    printf("old size: %d\n", old_arr_size);
 
-    for(int i = 0; i <= old_arr_size; i++){
+    for(int i = 0; i < old_arr_size; i++){
+        printf("iteration: %d\n", i );
         if((arr + i) != NULL && (arr + i)->next != NULL){
             current = (arr+i);
 
             while(current->next != NULL){
-                new_hash = generate_hash(*(current->val), ARRAY_SIZE);
+                new_hash = generate_hash(current->val, ARRAY_SIZE);
                 current2 = (new_node_arr+new_hash);
 
                 if(current2 == NULL){
@@ -115,7 +108,7 @@ void re_indexing_sizing(NODE2 *arr, NODE2 *new_node_arr){
         else if((arr+i) != NULL && (arr+i)->next == NULL){
 
             /* pre indexing - skontrul aj kyblik */
-            new_hash = generate_hash(*((arr+i)->val), ARRAY_SIZE);
+            new_hash = generate_hash((arr+i)->val, ARRAY_SIZE);
             current = (new_node_arr+new_hash);
 
             if(current == NULL){
@@ -138,11 +131,10 @@ void re_indexing_sizing(NODE2 *arr, NODE2 *new_node_arr){
 
 
 NODE2 *arr_init(){
-    NODE2* arr = malloc(ARRAY_SIZE * sizeof(NODE2));
+    NODE2* arr = (NODE2 *)malloc(ARRAY_SIZE * sizeof(NODE2));
 
     for(int i = 0; i < ARRAY_SIZE; i++){
-        // struct_arr[i] = NULL;
-        arr[i] = NULL;
+        (arr + i)->is_empty = NULL;
     }
 
     return arr;
@@ -150,19 +142,11 @@ NODE2 *arr_init(){
 
 
 
-void arr_null_init(){
-    for(int i = 0; i < ARRAY_SIZE; i++){
-        // struct_arr[i] = NULL;
-        (struct_arr + i) = NULL;
-    }
-}
-
-
 int main_chaining_hashing(int n, int arr[]){
+    int old_size;
     NODE2* new_bigger_arr;
     ARRAY_SIZE = eratosten(n);
     struct_arr = arr_init();
-    arr_null_init();
 
     printf("tu to este funguje: %d %d\n", ARRAY_SIZE, n);
 
@@ -170,9 +154,11 @@ int main_chaining_hashing(int n, int arr[]){
         printf("main iteration: %d\n", i);
         insert_chaining_hash(struct_arr, arr[i]);
         if(i > ARRAY_SIZE/2){
+            old_size = ARRAY_SIZE;
             ARRAY_SIZE = eratosten(3*n);
+            printf("new size: %d\n", ARRAY_SIZE);
             new_bigger_arr = arr_init();
-            re_indexing_sizing(struct_arr, new_bigger_arr);
+            struct_arr = re_indexing_sizing(struct_arr, new_bigger_arr, old_size);
         }
     }
 }
