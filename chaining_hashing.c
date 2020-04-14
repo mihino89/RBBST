@@ -3,7 +3,6 @@
 #include <math.h>
 #include <string.h>
 
-// todo udrzuj si aj hashe, aby pri resize som vedel porovnat ci sa meni
 
 typedef struct hash_item{ 
     int val; 
@@ -23,7 +22,6 @@ int ARRAY_SIZE;
 int eratosten(int size_of_array){
     int i, j;
     int *arr = (int *)malloc(size_of_array * sizeof(int));
-    // printf("new array size2: %d\n", size_of_array);
 
     for (i = 0; i <= size_of_array; i++)
         arr[i] = 1;
@@ -136,16 +134,17 @@ int main_chaining_hashing(int n, int arr[]){
 
     ARRAY_SIZE = eratosten(n);
     hash_table = arr_init(ARRAY_SIZE);
+    // printf("funguje %d\n", ARRAY_SIZE);
 
     for(int i = 0; i < n; i ++){
-        // printf("main iteration: %d\n", arr[i]);
+        // printf("funguje %d\n", i);
         insert_chaining_hash(hash_table, arr[i]);
         
-        // // resizing
+        // resizing
         if(load_factor(ARRAY_SIZE, i) > 0.66){
+            // printf("load factor %d\n", i);
             old_size = ARRAY_SIZE;
             ARRAY_SIZE = eratosten(3*ARRAY_SIZE);
-            // printf("new size %d old size %d\n", ARRAY_SIZE, old_size);
             hash_table = re_indexing_sizing(old_size);
         }
     }
