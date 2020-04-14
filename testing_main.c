@@ -78,14 +78,39 @@ void test_hashing(){
 }
 
 
+void test_big_chaining_hashing(){
+    double time_spent = 0.0;
+    int number = 1000000;
+    int array[number];
+
+    for (int i = 0; i < number; i++) {     
+        array[i] = i;
+    }
+
+    for (int i = 0; i < number; i++) {    
+        int temp = array[i];
+        int randomIndex = rand() % number;
+
+        array[i]           = array[randomIndex];
+        array[randomIndex] = temp;
+    }
+
+    clock_t begin = clock();
+    main_chaining_hashing(number, array);
+    clock_t end = clock();
+
+    time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Time elpased of Chaining hash table is %f seconds\n", time_spent);
+}
+
+
 int main() 
 { 
-  struct Node *root = NULL; 
+  //   test_hashing();
 
-//   test_big_avl();
-//   test_big_red_black();
-
-  test_hashing();
+  test_big_avl();
+  test_big_red_black();
+  test_big_chaining_hashing();
   
   return 0; 
 } 
