@@ -3,7 +3,8 @@
 #include "AVL_tree.c"
 #include "Red_Black_tree.c"
 #include "chaining_hashing.c"
- // https://www.geeksforgeeks.org/hashing-set-3-open-addressing/
+#include "linear_probing.c"
+
 
 void test_big_avl(){
     Node *head=NULL;
@@ -64,20 +65,6 @@ void test_big_red_black(){
 }
 
 
-void test_hashing(){
-    int arr[] = {54, 21, 96, 33, 76, 3212, 954, 41, 43245, 996};
-    int number = 11;
-    int array[number];
-
-    for (int i = 1; i < number-1; i++) {     
-        array[i] = i;
-    }
-    array[10] = 2;
-
-    main_chaining_hashing(10, arr);
-}
-
-
 void test_big_chaining_hashing(){
     double time_spent = 0.0;
     int number = 1000000;
@@ -101,16 +88,46 @@ void test_big_chaining_hashing(){
 
     time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
     printf("Time elpased of Chaining hash table is %f seconds\n", time_spent);
+
+    // begin = clock();
+    // main_linear_probing(number, array);
+    // end = clock();
+
+    // time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
+    // printf("Time elpased of Chaining hash table is %f seconds\n", time_spent);
+}
+
+void test_small(){
+    double time_spent = 0.0;
+    int number = 1000000;
+    int array[number];
+
+    for (int i = 0; i < number; i++) {     
+        array[i] = i;
+    }
+
+    for (int i = 0; i < number; i++) {    
+        int temp = array[i];
+        int randomIndex = rand() % number;
+
+        array[i]           = array[randomIndex];
+        array[randomIndex] = temp;
+    }
+
+    clock_t begin = clock();
+    main_linear_probing(number, array);
+    clock_t end = clock();
+
+    time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Time elpased of Linear probing hash table is %f seconds\n", time_spent);
 }
 
 
-int main() 
-{ 
-  //   test_hashing();
-
+int main() { 
   test_big_avl();
   test_big_red_black();
   test_big_chaining_hashing();
+  test_small();
   
   return 0; 
 } 
