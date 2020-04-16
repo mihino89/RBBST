@@ -139,4 +139,15 @@ Node *insert_avl(Node* node, int key)
     return node; 
 } 
 
+Node *search_avl(Node *head, int value){
+
+    if(head == NULL || head->key == value)
+        return head;
+
+    if(head->key < value)
+        return search_avl(head->right, value);
+    
+    return search_avl(head->left, value);
+}
+
   

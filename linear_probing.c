@@ -21,7 +21,7 @@ typedef struct hashtable_item{
 
 HASH_TABLE_ITEM *array;
 int size = 0;
-int max2 = 10;
+int max2;
 
 /* initializing hash table array */
 void init_array(){
@@ -78,4 +78,25 @@ void main_linear_probing(int n, int *arr){
     for(int i = 0; i < max2; i ++){
         insert(arr[i]);
     }
+}
+
+ITEM *search_linear_probing(int value){
+    int hash, i;
+
+    hash = hashcode(value);
+    i = hash;
+
+    while (array[i].flag == 1){
+
+        if (array[i].data->key == value){
+            return array[i].data;
+        }
+        i = (i + 1) % max2;
+
+        if (i == hash){
+            return NULL;
+        }
+    }
+
+    return NULL;
 }

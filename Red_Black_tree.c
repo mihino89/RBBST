@@ -262,3 +262,15 @@ NODE *insert_red_black_tree(NODE *head, int new_value){
 
     return pom;
 }
+
+
+NODE *search_red_black(NODE *head, int value){
+
+    if(head == NULL || head->val == value)
+        return head;
+
+    if(head->val < value)
+        return search_red_black(head->right, value);
+    
+    return search_red_black(head->left, value);
+}

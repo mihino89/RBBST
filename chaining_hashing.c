@@ -127,6 +127,30 @@ HASH_TABLE *re_indexing_sizing(int old_arr_size){
 }
 
 
+HASH_ITEM *search_chaining_hashing(int value){
+
+    // mozno to bude padat na size
+    int hash;
+    HASH_ITEM *current;
+
+    hash = generate_hash(value, ARRAY_SIZE);
+    current = hash_table[hash].chain_root;
+
+    if(current == NULL){
+        printf("Prvok sa nenachadza v hash tabulke! \n");
+        return NULL;
+    }
+
+    while(current != NULL){
+        if(current->val == value)
+            return current;
+        current = current->next;
+    }
+
+    return NULL;
+}
+
+
 int main_chaining_hashing(int n, int arr[]){
     int old_size;
     HASH_TABLE *new_bigger_arr;
