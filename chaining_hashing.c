@@ -3,6 +3,8 @@
 #include <math.h>
 #include <string.h>
 
+#define SMALLER_PRIME_NUM 2
+
 
 typedef struct hash_item{ 
     int val; 
@@ -14,13 +16,8 @@ typedef struct hash_table{
 } HASH_TABLE;
 
 
-// globalne pole 
-HASH_TABLE* hash_table;
-int ARRAY_SIZE;
-
-
 int eratosten(int size_of_array){
-    int i, j;
+    int i, j, max;
     int *arr = (int *)malloc(size_of_array * sizeof(int));
 
     for (i = 0; i <= size_of_array; i++)
@@ -34,8 +31,6 @@ int eratosten(int size_of_array){
             }
         }
     }
-
-    int max;
 
     for (int i = 2; i <= size_of_array; i++){
         if(arr[i] == 1)
@@ -66,17 +61,16 @@ HASH_ITEM *createNewNode(int value){
 }
 
 
-void insert_chaining_hash(HASH_TABLE *insert_hash_table, int value){
+void insert_chaining_hash(HASH_TABLE *insert_hash_table, int value, int hash_table_size){
     int hash;
     HASH_ITEM *new_hash_item, *current;
 
 
     new_hash_item = createNewNode(value);
-    hash = generate_hash(value, ARRAY_SIZE);
+    hash = generate_hash(value, hash_table_size);
 
     if(insert_hash_table[hash].chain_root == NULL){
         insert_hash_table[hash].chain_root = new_hash_item;
-        // printf("INSERT -> root je NULL na indexe %d prvy node s hodnotou: %d\n", hash, insert_hash_table[hash].chain_root->val);
     } else {
         current = insert_hash_table[hash].chain_root;
         while(current->next != NULL){
@@ -91,22 +85,42 @@ void insert_chaining_hash(HASH_TABLE *insert_hash_table, int value){
 
 
 HASH_TABLE *arr_init(int arr_init_size){
-    HASH_TABLE *arr_init = (HASH_TABLE *)malloc(arr_init_size * sizeof(HASH_TABLE));
+    printf("arr_init_size: %d\n", arr_init_size);
+    HASH_TABLE *hash_table_init = malloc(arr_init_size * sizeof(HASH_TABLE));
+    printf("arr_init_size2: %d\n", arr_init_size);
 
-    for(int i = 0; i < ARRAY_SIZE; i++){
-        arr_init[i].chain_root = NULL;
+    for(int i = 0; i < arr_init_size; i++){
+        hash_table_init[i].chain_root = NULL;
     }
 
-    return arr_init;
+    return hash_table_init;
 }
 
 
-HASH_TABLE *re_indexing_sizing(int old_arr_size){
+void hash_table_free(HASH_TABLE *hash_table_to_free, int hash_table_size){
+    HASH_ITEM *current, *temp;
+    int i;
+
+    for(i = 0; i < hash_table_size; i++){
+        if(hash_table_to_free[i].chain_root != NULL){
+            current = hash_table_to_free[i].chain_root;
+
+            while(current != NULL){
+                temp = current;
+                current = current->next;
+                free(temp);
+            }
+        }
+    }
+}
+
+
+HASH_TABLE *re_indexing_sizing(HASH_TABLE *hash_table, int new_arr_size, int old_arr_size){
     HASH_TABLE *new_hash_table;
     HASH_ITEM *current, *temp;
     int new_hash;
 
-    new_hash_table = arr_init(ARRAY_SIZE);
+    new_hash_table = arr_init(new_arr_size);
 
     for(int i = 0; i < old_arr_size; i++){
         if(hash_table[i].chain_root != NULL){
@@ -114,7 +128,7 @@ HASH_TABLE *re_indexing_sizing(int old_arr_size){
             current = hash_table[i].chain_root;
 
             while(current != NULL){
-                insert_chaining_hash(new_hash_table, current->val);
+                insert_chaining_hash(new_hash_table, current->val, new_arr_size);
                 temp = current;
                 current = current->next;
                 free(temp);
@@ -127,19 +141,15 @@ HASH_TABLE *re_indexing_sizing(int old_arr_size){
 }
 
 
-HASH_ITEM *search_chaining_hashing(int value){
-
-    // mozno to bude padat na size
+HASH_ITEM *search_chaining_hashing(HASH_TABLE *hash_table, int hash_table_size, int value){
     int hash;
     HASH_ITEM *current;
 
-    hash = generate_hash(value, ARRAY_SIZE);
+    hash = generate_hash(value, hash_table_size);
     current = hash_table[hash].chain_root;
 
-    if(current == NULL){
-        printf("Prvok sa nenachadza v hash tabulke! \n");
+    if(current == NULL)
         return NULL;
-    }
 
     while(current != NULL){
         if(current->val == value)
@@ -151,42 +161,32 @@ HASH_ITEM *search_chaining_hashing(int value){
 }
 
 
-HASH_TABLE *main_chaining_hashing(int n, int arr[]){
+HASH_TABLE *main_chaining_hashing(HASH_TABLE *main_hash_table, int *hash_table_size, int arr[], int input_data_arr){
     int old_size;
-    HASH_TABLE *new_bigger_arr;
-    HASH_ITEM *current;
 
-    ARRAY_SIZE = eratosten(n);
-    hash_table = arr_init(ARRAY_SIZE);
+    if(input_data_arr <= 0){
+        return NULL;
+    }
+    if(input_data_arr == 1)
+        *hash_table_size = SMALLER_PRIME_NUM;
+    else
+        *hash_table_size = eratosten(input_data_arr);
 
-    for(int i = 0; i < n; i ++){
-        // printf("funguje %d\n", i);
-        insert_chaining_hash(hash_table, arr[i]);
-        
+    main_hash_table = arr_init(*hash_table_size);
+
+    for(int i = 0; i < input_data_arr; i ++){
         // resizing
-        if(load_factor(ARRAY_SIZE, i) > 0.66){
-            // pintrintf("load factor %d\n", i);
-            old_size = ARRAY_SIZE;
-            ARRAY_SIZE = eratosten(3*ARRAY_SIZE);
-            hash_table = re_indexing_sizing(old_size);
+        if(load_factor(*hash_table_size, i) >= 0.66){
+            old_size = *hash_table_size;
+
+            *hash_table_size = eratosten(2*(*hash_table_size));
+            printf("resizing and reindexing %d %d\n", *hash_table_size, old_size);
+            main_hash_table = re_indexing_sizing(main_hash_table, *hash_table_size, old_size);
         }
+        // printf("iteration %d\n", i);
+        insert_chaining_hash(main_hash_table, arr[i], *hash_table_size);
     }
 
-    return hash_table;
 
-    // printf("final array size: %d\n", ARRAY_SIZE);
-    // for(int i = 0; i < ARRAY_SIZE; i ++){
-    //     if(hash_table[i].chain_root == NULL){
-    //         printf("chain: %d is NULL\n", i);
-    //     }
-    //     else {
-    //         current = hash_table[i].chain_root;
-    //         printf("chain: %d is ", i);
-    //         while(current->next != NULL){
-    //             printf("%d ", current->val);
-    //             current = current->next;
-    //         }
-    //         printf("%d \n", current->val);
-    //     }
-    // }
+    return main_hash_table;
 }
