@@ -53,46 +53,107 @@ void test_basic_red_black_tree(int *arr, int arr_size, int additional_choice){
         return;
     }
 
-    printf("Hodnota sa nenasla v datasete");
+    printf("Hodnota sa nenasla v datasete\n");
 }
 
 
-void test_basic_avl_tree(int *arr, int arr_size){
-    Node *head=NULL;
+void test_basic_avl_tree(int *arr, int arr_size, int additional_choice){
+    int searching_number;
+    Node *head = NULL, *founded = NULL;
     double time_spent = 0.0;
 
-    clock_t begin = clock();
-    for (int i = 0; i < arr_size; i++) {    
-        head = insert_avl(head, arr[i]);
+    if(additional_choice == INSERT){
+        clock_t begin = clock();
+        for (int i = 0; i < arr_size; i++)   
+            head = insert_avl(head, arr[i]);
+        
+        clock_t end = clock();
+
+        time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
+        printf("Cas potrebny pre vlozenie dataset algoritmu AVL TREE is %f seconds\n", time_spent);
+        return;
     }
-    clock_t end = clock();
 
-    time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Cas potrebny pre vlozenie dataset algoritmu AVL TREE is %f seconds\n", time_spent);
-}
-
-
-void test_basic_chaining_hashing(int *arr, int arr_size){
-    double time_spent = 0.0;
+    searching_number = searching_choice();
+    for (int i = 0; i < arr_size; i++)   
+        head = insert_avl(head, arr[i]);
 
     clock_t begin = clock();
-    main_chaining_hashing(arr_size, arr);
+    founded = search_avl(head, searching_number);
     clock_t end = clock();
 
     time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Cas potrebny pre vlozenie dataset algoritmu Chaining hash table is %f seconds\n", time_spent);
+    if(founded != NULL){
+        printf("Hodnota %d bola uspesne najdena v datasete za cas %f sekund\n", founded->key, time_spent);
+        return;
+    }
+
+    printf("Hodnota sa nenasla v datasete\n");  
 }
 
 
-void test_basic_linear_probing(int *arr, int arr_size){
+void test_basic_chaining_hashing(int *arr, int arr_size, int additional_choice){
+    int searching_number;
     double time_spent = 0.0;
+    HASH_ITEM *founded;
+    HASH_TABLE *hash_table;
+
+    if(additional_choice == INSERT){
+        clock_t begin = clock();
+        hash_table = main_chaining_hashing(arr_size, arr);
+        clock_t end = clock();
+
+        time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
+        printf("Cas potrebny pre vlozenie dataset algoritmu Chaining hash table is %f seconds\n", time_spent);
+        return;
+    }
     
+    searching_number = searching_choice();
+    hash_table = main_chaining_hashing(arr_size, arr);
+
     clock_t begin = clock();
-    main_linear_probing(arr_size, arr);
+    founded = search_chaining_hashing(searching_number);
     clock_t end = clock();
 
     time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Cas potrebny pre vlozenie dataset algoritmu Linear probing hash table is %f seconds\n", time_spent);
+    if(founded != NULL){
+        printf("Hodnota %d bola uspesne najdena v datasete za cas %f sekund\n", founded->val, time_spent);
+        return;
+    }
+
+    printf("Hodnota sa nenasla v datasete\n");  
+}
+
+
+void test_basic_linear_probing(int *arr, int arr_size, int additional_choice){
+    int searching_number;
+    double time_spent = 0.0;
+    ITEM *founded;
+    
+    if(additional_choice == INSERT){
+        clock_t begin = clock();
+        main_linear_probing(arr_size, arr);
+        clock_t end = clock();
+
+        time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
+        printf("Cas potrebny pre vlozenie dataset algoritmu Linear probing hash table is %f seconds\n", time_spent);
+        return;
+    }
+
+    searching_number = searching_choice();
+    main_linear_probing(arr_size, arr);
+
+    clock_t begin = clock();
+    founded = search_linear_probing(searching_number);
+    clock_t end = clock();
+
+    time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
+    if(founded != NULL){
+        printf("Hodnota %d bola uspesne najdena v datasete za cas %f sekund\n", founded->key, time_spent);
+        return;
+    }
+
+    printf("Hodnota sa nenasla v datasete\n");  
 }
 
 
@@ -195,25 +256,25 @@ void testing_enviroment(){
         case 1:
             printf("======= Zakladny test AVL tree =======\n");
             additional_choice = additional_menu();
-            test_basic_avl_tree(dataset, TEST_BASIC_SIZE);
+            test_basic_avl_tree(dataset, TEST_BASIC_SIZE, additional_choice);
             break;
         case 2:
             printf("======= Zakladny test Chaining hash table - with resizing =======\n");
             additional_choice = additional_menu();
-            test_basic_chaining_hashing(dataset, TEST_BASIC_SIZE);
+            test_basic_chaining_hashing(dataset, TEST_BASIC_SIZE, additional_choice);
             break;
         case 3:
             printf("======= Zakladny test Linear probing hash table =======\n");
             additional_choice = additional_menu();
-            test_basic_linear_probing(dataset, TEST_BASIC_SIZE);
+            test_basic_linear_probing(dataset, TEST_BASIC_SIZE, additional_choice);
             break;
         case 4:
             printf("======= Zakladny test - vsetky 4 algoritmy porovnanie =======\n");
             additional_choice = additional_menu();
             test_basic_red_black_tree(dataset, TEST_BASIC_SIZE, additional_choice);
-            test_basic_avl_tree(dataset, TEST_BASIC_SIZE);
-            test_basic_chaining_hashing(dataset, TEST_BASIC_SIZE);
-            test_basic_linear_probing(dataset, TEST_BASIC_SIZE);
+            test_basic_avl_tree(dataset, TEST_BASIC_SIZE, additional_choice);
+            test_basic_chaining_hashing(dataset, TEST_BASIC_SIZE, additional_choice);
+            test_basic_linear_probing(dataset, TEST_BASIC_SIZE, additional_choice);
             break;
         case 5:
             printf("======= Test s diverzitnymi hodnotami - Red Black tree =======\n");
@@ -223,25 +284,25 @@ void testing_enviroment(){
         case 6:
             printf("======= Test s diverzitnymi hodnotami - AVL tree =======\n");
             additional_choice = additional_menu();
-            test_basic_avl_tree(dataset2, TEST_BIG_NUMBERS);
+            test_basic_avl_tree(dataset2, TEST_BIG_NUMBERS, additional_choice);
             break;
         case 7:
             printf("======= Test s diverzitnymi hodnotami - Chaining hash table - with resizing =======\n");
             additional_choice = additional_menu();
-            test_basic_chaining_hashing(dataset2, TEST_BIG_NUMBERS);
+            test_basic_chaining_hashing(dataset2, TEST_BIG_NUMBERS, additional_choice);
             break;
         case 8:
             printf("======= Test s diverzitnymi hodnotami - Linear probing hash table =======\n");
             additional_choice = additional_menu();
-            test_basic_linear_probing(dataset2, TEST_BIG_NUMBERS);
+            test_basic_linear_probing(dataset2, TEST_BIG_NUMBERS, additional_choice);
             break;
         case 9:
             printf("======= Test s diverzitnymi hodnotami - vsetky 4 algoritmy porovnanie =======\n");
             additional_choice = additional_menu();
             test_basic_red_black_tree(dataset2, TEST_BIG_NUMBERS, additional_choice);
-            test_basic_avl_tree(dataset2, TEST_BIG_NUMBERS);
-            test_basic_chaining_hashing(dataset2, TEST_BIG_NUMBERS);
-            test_basic_linear_probing(dataset2, TEST_BIG_NUMBERS);
+            test_basic_avl_tree(dataset2, TEST_BIG_NUMBERS, additional_choice);
+            test_basic_chaining_hashing(dataset2, TEST_BIG_NUMBERS, additional_choice);
+            test_basic_linear_probing(dataset2, TEST_BIG_NUMBERS, additional_choice);
             break;
         default:
             break;

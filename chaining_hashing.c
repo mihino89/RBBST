@@ -151,14 +151,13 @@ HASH_ITEM *search_chaining_hashing(int value){
 }
 
 
-int main_chaining_hashing(int n, int arr[]){
+HASH_TABLE *main_chaining_hashing(int n, int arr[]){
     int old_size;
     HASH_TABLE *new_bigger_arr;
     HASH_ITEM *current;
 
     ARRAY_SIZE = eratosten(n);
     hash_table = arr_init(ARRAY_SIZE);
-    // printf("funguje %d\n", ARRAY_SIZE);
 
     for(int i = 0; i < n; i ++){
         // printf("funguje %d\n", i);
@@ -166,12 +165,14 @@ int main_chaining_hashing(int n, int arr[]){
         
         // resizing
         if(load_factor(ARRAY_SIZE, i) > 0.66){
-            // printf("load factor %d\n", i);
+            // pintrintf("load factor %d\n", i);
             old_size = ARRAY_SIZE;
             ARRAY_SIZE = eratosten(3*ARRAY_SIZE);
             hash_table = re_indexing_sizing(old_size);
         }
     }
+
+    return hash_table;
 
     // printf("final array size: %d\n", ARRAY_SIZE);
     // for(int i = 0; i < ARRAY_SIZE; i ++){
