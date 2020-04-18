@@ -92,25 +92,23 @@ void test_basic_avl_tree(int *arr, int arr_size, int additional_choice){
 }
 
 
-void test_basic_chaining_hashing(int *arr, int input_data_arr, int additional_choice){
+void test_basic_chaining_hashing(int *input_data, int input_data_size, int additional_choice){
     int *hash_table_size = (int *)malloc(sizeof(int));
     int searching_number;
     double time_spent = 0.0;
     HASH_ITEM *founded;
     HASH_TABLE *hash_table;
 
-    // printf("arr size in chaining hash fn: %d\n", input_data_arr);
-
     if(additional_choice == INSERT){
         clock_t begin = clock();
-        hash_table = main_chaining_hashing(hash_table, hash_table_size, arr, input_data_arr);
+        hash_table = main_chaining_hashing(hash_table, hash_table_size, input_data, input_data_size);
         clock_t end = clock();
 
         time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
         printf("Cas potrebny pre vlozenie dataset algoritmu Chaining hash table is %f seconds\n", time_spent);
     } else {
         searching_number = searching_choice();
-        hash_table = main_chaining_hashing(hash_table, hash_table_size, arr, input_data_arr);
+        hash_table = main_chaining_hashing(hash_table, hash_table_size, input_data, input_data_size);
 
         clock_t begin = clock();
         founded = search_chaining_hashing(hash_table, *hash_table_size, searching_number);
@@ -126,6 +124,7 @@ void test_basic_chaining_hashing(int *arr, int input_data_arr, int additional_ch
     }
 
     hash_table_free(hash_table, *hash_table_size);
+    free(hash_table);
 }
 
 
@@ -223,11 +222,11 @@ int *prepare_dataset_user_input(int *dataset_size){
     printf("Zadajte prosim prvky datasetu ktore chcete vlozit (maximum is: %d)\n", *dataset_size);
     
     for(i = 0; i < *dataset_size; i++){
-        scanf("%d", &arr[i]);
+        scanf("%d", (arr + i));
     }
 
     for(i = 0; i < *dataset_size; i++){
-        printf("%d ", arr[i]);
+        printf("%d ", *(arr + i));
     }
     printf("\n");
 
